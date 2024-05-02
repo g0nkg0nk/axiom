@@ -38,6 +38,7 @@ esac
 echo -e "${Blue}Installing doctl...${Color_Off}"
 if [[ $BASEOS == "Mac" ]]; then
 brew install doctl
+packer plugins install github.com/digitalocean/digitalocean
 elif [[ $BASEOS == "Linux" ]]; then
 OS=$(lsb_release -i | awk '{ print $3 }')
    if ! command -v lsb_release &> /dev/null; then
@@ -77,9 +78,10 @@ done
 
 doctl auth init -t "$token" | grep -vi "using token"
 
-echo -e -n "${Green}Autoselecting default region based on ping...${Color_Off}"
-default_region="$(for region in $(doctl compute region list | grep -v false | grep -v 'Slug' | awk '{ print $1 }'); do echo -n "$region,"; ping -c 1 speedtest-$region.digitalocean.com | grep "avg" | awk '{ print $4 }' | tr "/" ' ' | cut -d " " -f 1; done | sort -k2 -t , -n | head -n 1 | cut -d "," -f 1)"
+echo -e -n "${Green}Listing available regions with axiom-regions ls \n${Color_Off}"
+doctl compute region list | grep -v false 
 
+default_region=nyc1
 echo -e -n "${Green}Please enter your default region: (Default '$default_region', press enter) \n>> ${Color_Off}"
 read region
 	if [[ "$region" == "" ]]; then
